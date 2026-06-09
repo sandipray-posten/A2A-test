@@ -1,0 +1,42 @@
+[project]
+name = "a2a-agent-test"
+version = "1.0.0"
+description = "A2A Protocol v1.0 compliant multi-agent system with Agent A (Data Processor) and Agent B (Analyzer)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "agent-framework==1.0.0b251001",
+    "agent-framework-a2a==1.0.0b251001",
+    "a2a-sdk>=1.0.3",
+    "openai>=1.0.0",
+    "starlette>=0.27.0",
+    "uvicorn[standard]>=0.24.0",
+    "httpx>=0.28.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "sse-starlette>=3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "httpx>=0.28.0",
+]
+
+[project.scripts]
+agent-a = "agent_a:main"
+agent-b = "agent_b:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]

@@ -1,0 +1,56 @@
+services:
+  agent-a:
+    build: .
+    container_name: a2a-agent-a
+    ports:
+      - "8001:8001"
+    environment:
+      - AGENT_A_HOST=0.0.0.0
+      - AGENT_A_PORT=8001
+      - AGENT_A_URL=http://agent-a:8001
+      - GRAVITEE_BASE_URL=${GRAVITEE_BASE_URL}
+      - GRAVITEE_API_KEY=${GRAVITEE_API_KEY}
+      - GRAVITEE_API_PLATFORM_KEY=${GRAVITEE_API_PLATFORM_KEY}
+      - LLM_MODEL=${LLM_MODEL:-demo-openai:gpt-4.1}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    command: python agent_a.py
+    networks:
+      - a2a-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  agent-b:
+    build: .
+    container_name: a2a-agent-b
+    ports:
+      - "8002:8002"
+    environment:
+      - AGENT_B_HOST=0.0.0.0
+      - AGENT_B_PORT=8002
+      - AGENT_B_URL=http://agent-b:8002
+      - AGENT_A_URL=http://agent-a:8001
+      - GRAVITEE_BASE_URL=${GRAVITEE_BASE_URL}
+      - GRAVITEE_API_KEY=${GRAVITEE_API_KEY}
+      - GRAVITEE_API_PLATFORM_KEY=${GRAVITEE_API_PLATFORM_KEY}
+      - LLM_MODEL=${LLM_MODEL:-demo-openai:gpt-4.1}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    command: python agent_b.py
+    networks:
+      - a2a-network
+    depends_on:
+      agent-a:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  a2a-network:
+    driver: bridge

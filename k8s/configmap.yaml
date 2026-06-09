@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: a2a-config
+  namespace: a2a-agents
+data:
+  # Agent A Configuration
+  AGENT_A_HOST: "0.0.0.0"
+  AGENT_A_PORT: "8001"
+  AGENT_A_URL: "http://agent-a-service:8001"
+  
+  # Agent B Configuration
+  AGENT_B_HOST: "0.0.0.0"
+  AGENT_B_PORT: "8002"
+  AGENT_B_URL: "http://agent-b-service:8002"
+  
+  # LLM Model
+  LLM_MODEL: "demo-openai:gpt-4.1"
+  
+  # CORS - Set specific origins for production
+  CORS_ORIGINS: "*"
