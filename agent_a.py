@@ -188,12 +188,41 @@ async def health_check(request: Request) -> JSONResponse:
     return JSONResponse({"status": "healthy", "agent": "Agent A - Data Processor"})
 
 
+async def agent_card_handler(request: Request) -> JSONResponse:
+    """Return A2A agent card at /.well-known/agent.json"""
+    return JSONResponse({
+        "name": agent_a_card.name,
+        "description": agent_a_card.description,
+        "version": agent_a_card.version,
+        "defaultInputModes": agent_a_card.default_input_modes,
+        "defaultOutputModes": agent_a_card.default_output_modes,
+        "capabilities": {"streaming": agent_a_card.capabilities.streaming},
+        "supportedInterfaces": [
+            {
+                "url": iface.url,
+                "protocolBinding": iface.protocol_binding,
+                "protocolVersion": iface.protocol_version
+            } for iface in agent_a_card.supported_interfaces
+        ],
+        "skills": [
+            {
+                "id": skill.id,
+                "name": skill.name,
+                "description": skill.description,
+                "tags": skill.tags,
+                "examples": skill.examples
+            } for skill in agent_a_card.skills
+        ]
+    })
+
+
 # ---------------------------------------------------
 # SERVER
 # ---------------------------------------------------
 server = Starlette(
     routes=[
         Route("/health", health_check, methods=["GET"]),
+        Route("/.well-known/agent.json", agent_card_handler, methods=["GET"]),
         Route("/a2a/process", handle_a2a_request, methods=["POST"]),
         *create_agent_card_routes(agent_a_card),
         # Keep root for backward compatibility
