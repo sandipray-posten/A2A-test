@@ -2,13 +2,19 @@
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
-# Install dependencies
+# Install uv for faster dependency resolution
+RUN pip install uv
+
+# Copy requirements first for layer caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Install dependencies with uv (much faster than pip)
+RUN uv pip install --system -r requirements.txt
 
 # Copy application code
 COPY agent_a.py gravitee_config.py ./
