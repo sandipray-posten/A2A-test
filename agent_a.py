@@ -190,30 +190,21 @@ async def health_check(request: Request) -> JSONResponse:
 
 async def agent_card_handler(request: Request) -> JSONResponse:
     """Return A2A agent card at /.well-known/agent.json"""
-    return JSONResponse({
-        "name": agent_a_card.name,
-        "description": agent_a_card.description,
-        "version": agent_a_card.version,
-        "defaultInputModes": agent_a_card.default_input_modes,
-        "defaultOutputModes": agent_a_card.default_output_modes,
-        "capabilities": {"streaming": agent_a_card.capabilities.streaming},
-        "supportedInterfaces": [
-            {
-                "url": iface.url,
-                "protocolBinding": iface.protocol_binding,
-                "protocolVersion": iface.protocol_version
-            } for iface in agent_a_card.supported_interfaces
-        ],
-        "skills": [
-            {
-                "id": skill.id,
-                "name": skill.name,
-                "description": skill.description,
-                "tags": skill.tags,
-                "examples": skill.examples
-            } for skill in agent_a_card.skills
-        ]
-    })
+    try:
+        # Try to use built-in serialization
+        if hasattr(agent_a_card, 'model_dump'):
+            return JSONResponse(agent_a_card.model_dump())
+        elif hasattr(agent_a_card, 'dict'):
+            return JSONResponse(agent_a_card.dict())
+        else:
+            # Manual fallback
+            return JSONResponse({
+                "name": agent_a_card.name,
+                "description": agent_a_card.description,
+                "version": agent_a_card.version,
+            })
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 # ---------------------------------------------------
