@@ -322,7 +322,7 @@ async def agent_card_handler(request: Request) -> JSONResponse:
 server = Starlette(
     routes=[
         Route("/health", health_check, methods=["GET"]),
-        Route("/.well-known/agent.json", agent_card_handler, methods=["GET"]),
+        Route("/.well-known/agent-card.json", agent_card_handler, methods=["GET"]),
         Route("/a2a/analyze", handle_a2a_request, methods=["POST"]),
         *create_agent_card_routes(agent_b_card),
         # Keep root for backward compatibility
