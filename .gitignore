@@ -3,13 +3,6 @@
 .env.local
 .env.*.local
 
-# Deployment files (excluded for now)
-k8s/
-Dockerfile
-docker-compose.yml
-.github/
-papp-terraform/
-
 # Python
 __pycache__/
 *.py[cod]
