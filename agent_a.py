@@ -190,21 +190,33 @@ async def health_check(request: Request) -> JSONResponse:
 
 async def agent_card_handler(request: Request) -> JSONResponse:
     """Return A2A agent card at /.well-known/agent.json"""
-    try:
-        # Try to use built-in serialization
-        if hasattr(agent_a_card, 'model_dump'):
-            return JSONResponse(agent_a_card.model_dump())
-        elif hasattr(agent_a_card, 'dict'):
-            return JSONResponse(agent_a_card.dict())
-        else:
-            # Manual fallback
-            return JSONResponse({
-                "name": agent_a_card.name,
-                "description": agent_a_card.description,
-                "version": agent_a_card.version,
-            })
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
+    # Convert all protobuf types to native Python types
+    return JSONResponse({
+        "name": str(agent_a_card.name),
+        "description": str(agent_a_card.description),
+        "version": str(agent_a_card.version),
+        "defaultInputModes": list(agent_a_card.default_input_modes),
+        "defaultOutputModes": list(agent_a_card.default_output_modes),
+        "capabilities": {
+            "streaming": bool(agent_a_card.capabilities.streaming) if agent_a_card.capabilities else False
+        },
+        "supportedInterfaces": [
+            {
+                "url": str(iface.url),
+                "protocolBinding": str(iface.protocol_binding),
+                "protocolVersion": str(iface.protocol_version)
+            } for iface in list(agent_a_card.supported_interfaces or [])
+        ],
+        "skills": [
+            {
+                "id": str(skill.id),
+                "name": str(skill.name),
+                "description": str(skill.description),
+                "tags": list(skill.tags) if skill.tags else [],
+                "examples": list(skill.examples) if skill.examples else []
+            } for skill in list(agent_a_card.skills or [])
+        ]
+    })
 
 
 # ---------------------------------------------------
