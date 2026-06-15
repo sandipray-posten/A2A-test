@@ -1,8 +1,13 @@
-# Dockerfile for A2A Agent A - Data Processor
+# Dockerfile for A2A Agents
 FROM python:3.11-slim
 
+# Build argument to select which agent to build (agent_a or agent_b)
+ARG AGENT=agent_a
+ARG PORT=8001
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    AGENT_FILE=${AGENT}.py
 
 WORKDIR /app
 
@@ -10,10 +15,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY agent_a.py gravitee_config.py ./
+# Copy application code (both agents, simpler approach)
+COPY agent_a.py agent_b.py gravitee_config.py ./
 
-# Agent A listens on port 8001
-EXPOSE 8001
+# Expose the agent's port
+EXPOSE ${PORT}
 
-CMD ["python", "agent_a.py"]
+# Use shell form to allow variable expansion
+CMD python ${AGENT_FILE}

@@ -1,14 +1,19 @@
-name: Build and Push to GHCR
+name: Build and Push Agent B to GHCR
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'agent_b.py'
+      - 'gravitee_config.py'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - '.github/workflows/build-push-agent-b.yml'
   workflow_dispatch:  # Manual trigger
 
 env:
   REGISTRY: ghcr.io
-  # Force lowercase for Docker compatibility
-  IMAGE_NAME: ${{ github.repository_owner }}/agent-a
+  IMAGE_NAME: ${{ github.repository_owner }}/agent-b
 
 jobs:
   build-and-push:
@@ -39,8 +44,8 @@ jobs:
           push: true
           no-cache: true
           build-args: |
-            AGENT=agent_a
-            PORT=8001
+            AGENT=agent_b
+            PORT=8002
           tags: |
             ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:latest
             ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ github.sha }}

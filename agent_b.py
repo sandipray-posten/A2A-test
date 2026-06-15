@@ -285,12 +285,44 @@ async def health_check(request: Request) -> JSONResponse:
     return JSONResponse({"status": "healthy", "agent": "Agent B - Analyzer"})
 
 
+async def agent_card_handler(request: Request) -> JSONResponse:
+    """Return A2A agent card at /.well-known/agent.json"""
+    # Convert all protobuf types to native Python types
+    return JSONResponse({
+        "name": str(agent_b_card.name),
+        "description": str(agent_b_card.description),
+        "version": str(agent_b_card.version),
+        "defaultInputModes": list(agent_b_card.default_input_modes),
+        "defaultOutputModes": list(agent_b_card.default_output_modes),
+        "capabilities": {
+            "streaming": bool(agent_b_card.capabilities.streaming) if agent_b_card.capabilities else False
+        },
+        "supportedInterfaces": [
+            {
+                "url": str(iface.url),
+                "protocolBinding": str(iface.protocol_binding),
+                "protocolVersion": str(iface.protocol_version)
+            } for iface in list(agent_b_card.supported_interfaces or [])
+        ],
+        "skills": [
+            {
+                "id": str(skill.id),
+                "name": str(skill.name),
+                "description": str(skill.description),
+                "tags": list(skill.tags) if skill.tags else [],
+                "examples": list(skill.examples) if skill.examples else []
+            } for skill in list(agent_b_card.skills or [])
+        ]
+    })
+
+
 # ---------------------------------------------------
 # SERVER
 # ---------------------------------------------------
 server = Starlette(
     routes=[
         Route("/health", health_check, methods=["GET"]),
+        Route("/.well-known/agent.json", agent_card_handler, methods=["GET"]),
         Route("/a2a/analyze", handle_a2a_request, methods=["POST"]),
         *create_agent_card_routes(agent_b_card),
         # Keep root for backward compatibility
